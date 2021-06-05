@@ -20,27 +20,27 @@ import java.util.UUID;
 @RequestMapping("/")
 public class PaymentController {
 
-    @Autowired PaymentService paymentService;
+  @Autowired PaymentService paymentService;
 
-    /**
-     * This API endpoint gets all the payment methods
-     *
-     * @return Payment methods
-     */
-    @CrossOrigin
-    @RequestMapping(
-            method = RequestMethod.GET,
-            path = "/payment",
-            produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public ResponseEntity<PaymentListResponse> getAllPaymentMethods() {
-        List<PaymentEntity> paymentMathods = paymentService.getAllPaymentMethods();
-        PaymentListResponse paymentListResponse = new PaymentListResponse();
-        for (PaymentEntity paymentMethod : paymentMathods) {
-            PaymentResponse paymentResponse = new PaymentResponse();
-            paymentResponse.setId(UUID.fromString(paymentMethod.getUuid()));
-            paymentResponse.setPaymentName(paymentMethod.getPaymentName());
-            paymentListResponse.addPaymentMethodsItem(paymentResponse);
-        }
-        return new ResponseEntity<>(paymentListResponse, HttpStatus.OK);
+  /**
+   * This API endpoint gets all the payment methods
+   *
+   * @return Payment methods
+   */
+  @CrossOrigin
+  @RequestMapping(
+      method = RequestMethod.GET,
+      path = "/payment",
+      produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+  public ResponseEntity<PaymentListResponse> getAllPaymentMethods() {
+    List<PaymentEntity> paymentMathods = paymentService.getAllPaymentMethods();
+    PaymentListResponse paymentListResponse = new PaymentListResponse();
+    for (PaymentEntity paymentMethod : paymentMathods) {
+      PaymentResponse paymentResponse = new PaymentResponse();
+      paymentResponse.setId(UUID.fromString(paymentMethod.getUuid()));
+      paymentResponse.setPaymentName(paymentMethod.getPaymentName());
+      paymentListResponse.addPaymentMethodsItem(paymentResponse);
     }
+    return new ResponseEntity<>(paymentListResponse, HttpStatus.OK);
+  }
 }

@@ -13,38 +13,38 @@ import java.util.List;
 @Repository
 public class PaymentDao {
 
-    @PersistenceContext private EntityManager entityManager;
+  @PersistenceContext private EntityManager entityManager;
 
-    /**
-     * This method gets all the payment methods
-     *
-     * @return
-     */
-    public List<PaymentEntity> getAllPaymentMethods() {
-        List<PaymentEntity> paymentMethods =
-                entityManager.createNamedQuery("getAllPaymentMethods", PaymentEntity.class).getResultList();
-        if (paymentMethods != null) {
-            return paymentMethods;
-        }
-        return Collections.emptyList();
+  /**
+   * This method gets all the payment methods
+   *
+   * @return
+   */
+  public List<PaymentEntity> getAllPaymentMethods() {
+    List<PaymentEntity> paymentMethods =
+        entityManager.createNamedQuery("getAllPaymentMethods", PaymentEntity.class).getResultList();
+    if (paymentMethods != null) {
+      return paymentMethods;
     }
+    return Collections.emptyList();
+  }
 
-    /**
-     * Fetch payment based on UUID.
-     *
-     * @param paymentUUID
-     * @return PaymentEntity if found else null.
-     */
-    public PaymentEntity getPaymentByUUID(String paymentUUID) {
-        try {
-            PaymentEntity paymentEntity =
-                    entityManager
-                            .createNamedQuery("getPaymentByUUID", PaymentEntity.class)
-                            .setParameter("paymentUUID", paymentUUID)
-                            .getSingleResult();
-            return paymentEntity;
-        } catch (NoResultException nre) {
-            return null;
-        }
+  /**
+   * Fetch payment based on UUID.
+   *
+   * @param paymentUUID
+   * @return PaymentEntity if found else null.
+   */
+  public PaymentEntity getPaymentByUUID(String paymentUUID) {
+    try {
+      PaymentEntity paymentEntity =
+          entityManager
+              .createNamedQuery("getPaymentByUUID", PaymentEntity.class)
+              .setParameter("paymentUUID", paymentUUID)
+              .getSingleResult();
+      return paymentEntity;
+    } catch (NoResultException nre) {
+      return null;
     }
+  }
 }

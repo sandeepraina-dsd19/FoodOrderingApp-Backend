@@ -15,32 +15,32 @@ import javax.persistence.PersistenceContext;
 @Repository
 public class CustomerAddressDao {
 
-    @PersistenceContext private EntityManager entityManager;
+  @PersistenceContext private EntityManager entityManager;
 
-    /**
-     * Creates mapping between the customer and the address entity.
-     *
-     * @param customerAddressEntity Customer and the address to map.
-     * @return CustomerAddressEntity object.
-     */
-    public void createCustomerAddress(final CustomerAddressEntity customerAddressEntity) {
-        entityManager.persist(customerAddressEntity);
-    }
+  /**
+   * Creates mapping between the customer and the address entity.
+   *
+   * @param customerAddressEntity Customer and the address to map.
+   * @return CustomerAddressEntity object.
+   */
+  public void createCustomerAddress(final CustomerAddressEntity customerAddressEntity) {
+    entityManager.persist(customerAddressEntity);
+  }
 
-    /**
-     * fetches the address of a customer using givne address.
-     *
-     * @param address address to fetch.
-     * @return CustomerAddressEntity type object.
-     */
-    public CustomerAddressEntity customerAddressByAddress(final AddressEntity address) {
-        try {
-            return entityManager
-                    .createNamedQuery("customerAddressByAddress", CustomerAddressEntity.class)
-                    .setParameter("address", address)
-                    .getSingleResult();
-        } catch (NoResultException nre) {
-            return null;
-        }
+  /**
+   * fetches the address of a customer using givne address.
+   *
+   * @param address address to fetch.
+   * @return CustomerAddressEntity type object.
+   */
+  public CustomerAddressEntity customerAddressByAddress(final AddressEntity address) {
+    try {
+      return entityManager
+          .createNamedQuery("customerAddressByAddress", CustomerAddressEntity.class)
+          .setParameter("address", address)
+          .getSingleResult();
+    } catch (NoResultException nre) {
+      return null;
     }
+  }
 }

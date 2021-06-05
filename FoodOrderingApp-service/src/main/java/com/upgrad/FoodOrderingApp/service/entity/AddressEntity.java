@@ -1,141 +1,163 @@
 package com.upgrad.FoodOrderingApp.service.entity;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToOne;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
+import javax.persistence.Table;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.io.Serializable;
 
 @Entity
-@Table(
-        name = "address"
-)
+@Table(name = "address")
 @NamedQueries({
-        @NamedQuery(name = "allSavedAddress", query= "select a from AddressEntity a"),
-        @NamedQuery(name = "addressById", query = "select a from AddressEntity a where a.id = :id"),
-        @NamedQuery(name = "addressByUuid", query = "select a from AddressEntity a where a.uuid = :uuid")
+  @NamedQuery(
+      name = "addressByUUID",
+      query = "select a from AddressEntity a where a.uuid=:addressUUID")
 })
 public class AddressEntity implements Serializable {
 
-    @Id
-    @Column(
-            name = "ID"
-    )
-    @GeneratedValue(
-            strategy = GenerationType.IDENTITY
-    )
-    private long id;
+  @Id
+  @Column(name = "id")
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Integer id;
 
-    @Column(
-            name = "UUID"
-    )
-    @Size(
-            max = 200
-    )
-    private String uuid;
+  @Column(name = "uuid", unique = true)
+  @Size(max = 200)
+  @NotNull
+  private String uuid;
 
-    @Column(
-            name = "FLAT_BUIL_NUMBER"
-    )
-    private String flatBuilNumber;
+  @Column(name = "flat_buil_number")
+  @Size(max = 255)
+  private String flatBuilNo;
 
-    @Column(
-            name = "LOCALITY"
-    )
-    private String locality;
+  @Column(name = "locality")
+  @Size(max = 255)
+  private String locality;
 
-    @Column(
-            name = "CITY"
-    )
-    @Size(
-            max = 30
-    )
-    private String city;
+  @Column(name = "city")
+  @Size(max = 30)
+  private String city;
 
-    @Column(
-            name = "PINCODE"
-    )
-    @Size(
-            max = 30
-    )
-    private String pinCode;
+  @Size(max = 30)
+  @Column(name = "pincode")
+  private String pincode;
 
-    @ManyToOne
-    @OnDelete(
-            action = OnDeleteAction.CASCADE
-    )
-    @JoinColumn(
-            name = "STATE_ID"
-    )
-    private StateEntity state;
+  @ManyToOne
+  @OnDelete(action = OnDeleteAction.CASCADE)
+  @JoinColumn(name = "state_id")
+  private StateEntity state;
 
-    @Column(
-            name = "ACTIVE"
-    )
-    private Integer active;
+  @Column(name = "active")
+  private Integer active;
 
-    public long getId() {
-        return id;
-    }
+  public AddressEntity() {}
 
-    public void setId(long id) {
-        this.id = id;
-    }
+  public AddressEntity(
+      @Size(max = 200) @NotNull String uuid,
+      @Size(max = 255) String flatBuilNo,
+      @Size(max = 255) String locality,
+      @Size(max = 30) String city,
+      @Size(max = 30) String pincode,
+      StateEntity state) {
+    this.uuid = uuid;
+    this.flatBuilNo = flatBuilNo;
+    this.locality = locality;
+    this.city = city;
+    this.pincode = pincode;
+    this.state = state;
+  }
 
-    public String getUuid() {
-        return uuid;
-    }
+  public Integer getId() {
+    return id;
+  }
 
-    public void setUuid(String uuid) {
-        this.uuid = uuid;
-    }
+  public void setId(Integer id) {
+    this.id = id;
+  }
 
-    public String getFlatBuilNumber() {
-        return flatBuilNumber;
-    }
+  public String getUuid() {
+    return uuid;
+  }
 
-    public void setFlatBuilNo(String flatBuilNumber) {
-        this.flatBuilNumber = flatBuilNumber;
-    }
+  public void setUuid(String uuid) {
+    this.uuid = uuid;
+  }
 
-    public String getLocality() {
-        return locality;
-    }
+  public String getFlatBuilNo() {
+    return flatBuilNo;
+  }
 
-    public void setLocality(String locality) {
-        this.locality = locality;
-    }
+  public void setFlatBuilNo(String flatBuilNo) {
+    this.flatBuilNo = flatBuilNo;
+  }
 
-    public String getCity() {
-        return city;
-    }
+  public String getLocality() {
+    return locality;
+  }
 
-    public void setCity(String city) {
-        this.city = city;
-    }
+  public void setLocality(String locality) {
+    this.locality = locality;
+  }
 
-    public String getPinCode() {
-        return pinCode;
-    }
+  public String getCity() {
+    return city;
+  }
 
-    public void setPincode(String pinCode) {
-        this.pinCode = pinCode;
-    }
+  public void setCity(String city) {
+    this.city = city;
+  }
 
-    public StateEntity getState() {
-        return state;
-    }
+  public String getPincode() {
+    return pincode;
+  }
 
-    public void setState(StateEntity state) {
-        this.state = state;
-    }
+  public void setPincode(String pincode) {
+    this.pincode = pincode;
+  }
 
-    public Integer getActive() {
-        return active;
-    }
+  public StateEntity getState() {
+    return state;
+  }
 
-    public void setActive(Integer active) {
-        this.active = active;
-    }
+  public void setState(StateEntity state) {
+    this.state = state;
+  }
+
+  public Integer getActive() {
+    return active;
+  }
+
+  public void setActive(Integer active) {
+    this.active = active;
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    return new EqualsBuilder().append(this, obj).isEquals();
+  }
+
+  @Override
+  public int hashCode() {
+    return new HashCodeBuilder().append(this).hashCode();
+  }
+
+  @Override
+  public String toString() {
+    return ToStringBuilder.reflectionToString(this, ToStringStyle.MULTI_LINE_STYLE);
+  }
 }
