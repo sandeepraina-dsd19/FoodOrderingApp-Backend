@@ -1,5 +1,6 @@
 package com.upgrad.FoodOrderingApp.service.businness;
 
+
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
@@ -11,13 +12,14 @@ import java.security.spec.InvalidKeySpecException;
 import java.util.Base64;
 import java.util.Random;
 
+
 @Component
 public class PasswordCryptographyProvider {
 
     private static String SECRET_KEY_ALGORITHM = "PBKDF2WithHmacSHA512";
     private static int HASHING_ITERATIONS = 1000;
     private static int HASHING_KEY_LENGTH = 64;
-    private static final char[] hexArray = "0123456789ABCDEF".toCharArray();
+    private final static char[] hexArray = "0123456789ABCDEF".toCharArray();
 
     /**
      * This method generates Salt and hashed Password
@@ -28,15 +30,15 @@ public class PasswordCryptographyProvider {
     public String[] encrypt(final String password) {
         byte[] salt = generateSaltBytes();
         byte[] hashedPassword = hashPassword(password.toCharArray(), salt);
-        return new String[] {getBase64EncodedBytesAsString(salt), bytesToHex(hashedPassword)};
+        return new String[]{getBase64EncodedBytesAsString(salt), bytesToHex(hashedPassword)};
     }
 
     /**
-     * This method re-generates hashed Password from raw-password and salt. This will be used during
-     * authentication.
+     * This method re-generates hashed Password from raw-password and salt.
+     * This will be used during authentication.
      *
      * @param password char array.
-     * @param salt byte array.
+     * @param salt     byte array.
      * @return byte array of hashed password.
      */
     public static String encrypt(final String password, String salt) {
@@ -59,7 +61,7 @@ public class PasswordCryptographyProvider {
      * This method generates hashed Password
      *
      * @param password char array.
-     * @param salt byte array.
+     * @param salt     byte array.
      * @return byte array of hashed password.
      */
     private static byte[] hashPassword(final char[] password, final byte[] salt) {
@@ -92,3 +94,5 @@ public class PasswordCryptographyProvider {
         return Base64.getDecoder().decode(decode);
     }
 }
+
+
