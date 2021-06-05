@@ -1,13 +1,10 @@
 package com.upgrad.FoodOrderingApp.service.businness;
 
-// import com.sun.jndi.cosnaming.IiopUrl;
 import com.upgrad.FoodOrderingApp.service.dao.AddressDao;
 import com.upgrad.FoodOrderingApp.service.dao.CustomerAddressDao;
+import com.upgrad.FoodOrderingApp.service.dao.OrdersDao;
 import com.upgrad.FoodOrderingApp.service.dao.StateDao;
-import com.upgrad.FoodOrderingApp.service.entity.AddressEntity;
-import com.upgrad.FoodOrderingApp.service.entity.CustomerAddressEntity;
-import com.upgrad.FoodOrderingApp.service.entity.CustomerEntity;
-import com.upgrad.FoodOrderingApp.service.entity.StateEntity;
+import com.upgrad.FoodOrderingApp.service.entity.*;
 import com.upgrad.FoodOrderingApp.service.exception.AddressNotFoundException;
 import com.upgrad.FoodOrderingApp.service.exception.AuthorizationFailedException;
 import com.upgrad.FoodOrderingApp.service.exception.SaveAddressException;
@@ -16,124 +13,151 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
 public class AddressService {
-    @Autowired
-    private CustomerAddressDao customerAddressDao;
 
-    @Autowired
-    private AddressDao addressDao;
+    @Autowired private StateDao stateDao;
 
-    @Autowired
-    private StateDao stateDao;
+    @Autowired private AddressDao addressDao;
 
-    //Creating and persisting a new address added by customer
+    @Autowired private CustomerAddressDao customerAddressDao;
+
+    @Autowired private OrdersDao ordersDao;
+
+    /**
+     * This method implements the logic for 'saving the address' endpoint.
+     *
+     * @param addressEntity new address will be created from given AddressEntity object.
+     * @param customerEntity saves the address of the given customer.
+     * @return AddressEntity object.
+     * @throws SaveAddressException exception if any of the validation fails on customer details.
+     */
     @Transactional(propagation = Propagation.REQUIRED)
-    public AddressEntity saveAddress(final AddressEntity addressEntity,final CustomerEntity customerEntity)throws SaveAddressException{
-        //pincode must have digits only from 0 to 9 and must be of 6 digits
-        String pinCodeRegex ="^[0-9]{6}$";
-        if(addressEntity.getFlatBuilNumber().isEmpty()
-                || addressEntity.getLocality().isEmpty()
-                || addressEntity.getCity().isEmpty()
-                || addressEntity.getPinCode().isEmpty()
-                || addressEntity.getUuid().isEmpty()){
-            throw new SaveAddressException("SAR-001", "No field can be empty.");
-        }//pincode must be of the proper format
-        else if (!addressEntity.getPinCode().matches(pinCodeRegex)){
-            throw new SaveAddressException("SAR-002", "Invalid pincode");
-        }//else create the address iin the database
-        else {
-            AddressEntity persistedAddressEntity = addressDao.createAddress(addressEntity);
-            final CustomerAddressEntity customerAddressEntity = new CustomerAddressEntity();
-            customerAddressEntity.setAddress(persistedAddressEntity);
-            customerAddressEntity.setCustomer(customerEntity);
-            createCustomerAddress(customerAddressEntity);
-            return persistedAddressEntity;
-        }
-    }
-
-//Get state details by UUID
-    public StateEntity getStateByUUID(final String stateUuid) throws AddressNotFoundException, SaveAddressException{
-
-        StateEntity stateEntity =stateDao.getStateByUuid(stateUuid);
-        if(stateEntity == null){
-            throw new AddressNotFoundException("ANF-002","No state by this id");
-        }
-        else {
-            return stateEntity;
-        }
-    }
-
-
-    //Validating pincode format - length is 6 and contains only numbers
-    public String validatePincode(final String pinCode) throws SaveAddressException{
-        boolean validPincode = true;
-        if(pinCode.length()==6){
-            if(pinCode.matches(".*[^0-9].*")) {
-               validPincode = false;
+    public AddressEntity saveAddress(
+            final AddressEntity addressEntity, final CustomerEntity customerEntity)
+            throws SaveAddressException {
+        if (addressEntity.getActive() != null
+                && addressEntity.getLocality() != null
+                && !addressEntity.getLocality().isEmpty()
+                && addressEntity.getCity() != null
+                && !addressEntity.getCity().isEmpty()
+                && addressEntity.getFlatBuilNo() != null
+                && !addressEntity.getFlatBuilNo().isEmpty()
+                && addressEntity.getPincode() != null
+                && !addressEntity.getPincode().isEmpty()
+                && addressEntity.getState() != null) {
+            if (!isValidPinCode(addressEntity.getPincode())) {
+                throw new SaveAddressException("SAR-002", "Invalid pincode");
             }
+
+            AddressEntity createdCustomerAddress = addressDao.createCustomerAddress(addressEntity);
+
+            CustomerAddressEntity createdCustomerAddressEntity = new CustomerAddressEntity();
+            createdCustomerAddressEntity.setCustomer(customerEntity);
+            createdCustomerAddressEntity.setAddress(createdCustomerAddress);
+            customerAddressDao.createCustomerAddress(createdCustomerAddressEntity);
+            return createdCustomerAddress;
         } else {
-            validPincode = false;
-        }
-        if(validPincode) {
-            return pinCode;
-        } else {
-            throw new SaveAddressException("SAR-002","Invalid pincode");
+            throw new SaveAddressException("SAR-001", "No field can be empty");
         }
     }
 
-    //Persisting created address entity
-    @Transactional(propagation = Propagation.REQUIRED)
-    public CustomerAddressEntity createCustomerAddress(final CustomerAddressEntity customerAddressEntity){
-        return addressDao.createCustomerAddress(customerAddressEntity);
+    /**
+     * Returns all the addresses of a given customer.
+     *
+     * @param customerEntity Customer whose addresses are to be returned.
+     * @return List<AddressEntity> object.
+     */
+    public List<AddressEntity> getAllAddress(final CustomerEntity customerEntity) {
+        List<AddressEntity> addressEntityList = new ArrayList<>();
+        List<CustomerAddressEntity> customerAddressEntityList =
+                addressDao.customerAddressByCustomer(customerEntity);
+        if (customerAddressEntityList != null || !customerAddressEntityList.isEmpty()) {
+            customerAddressEntityList.forEach(
+                    customerAddressEntity -> addressEntityList.add(customerAddressEntity.getAddress()));
+        }
+        return addressEntityList;
     }
 
-    //Get all addresses for a customer entity
+    /**
+     * Deletes given address from database if no orders placed using the given address.
+     *
+     * @param addressEntity Address to delete.
+     * @return AddressEntity type object.
+     */
     @Transactional(propagation = Propagation.REQUIRED)
-    public List<AddressEntity> getAllAddress (final CustomerEntity customerEntity){
-        return customerAddressDao.getCustomerAddressListByCustomer(customerEntity);
+    public AddressEntity deleteAddress(final AddressEntity addressEntity) {
+        final List<OrderEntity> orders = ordersDao.getAllOrdersByAddress(addressEntity);
+        if (orders == null || orders.isEmpty()) {
+            return addressDao.deleteAddress(addressEntity);
+        }
+        addressEntity.setActive(0);
+        return addressDao.updateAddress(addressEntity);
     }
 
-    //Getting an address by UUID
-    @Transactional(propagation = Propagation.REQUIRED)
-    public AddressEntity getAddressByUUID(final String addressUuid,final CustomerEntity customerEntity) throws AddressNotFoundException, AuthorizationFailedException {
-        //if address id is empty, throw exception
-        if(addressUuid.isEmpty()){
+    /**
+     * This method implements logic for getting the Address using address uuid.
+     *
+     * @param addressId Address UUID.
+     * @param customerEntity Customer whose addresses has to be fetched.
+     * @return AddressEntity object.
+     * @throws AddressNotFoundException If any validation on address fails.
+     * @throws AuthorizationFailedException If any validation on customer fails.
+     */
+    public AddressEntity getAddressByUUID(final String addressId, final CustomerEntity customerEntity)
+            throws AuthorizationFailedException, AddressNotFoundException {
+        AddressEntity addressEntity = addressDao.getAddressByUUID(addressId);
+        if (addressId.isEmpty()) {
             throw new AddressNotFoundException("ANF-005", "Address id can not be empty");
         }
-        AddressEntity addressEntityToBeDeleted = addressDao.getAddressByAddressUuid(addressUuid);
-        //if address id is incorrect and no such address exist in database
-        if(addressEntityToBeDeleted == null){
+        if (addressEntity == null) {
             throw new AddressNotFoundException("ANF-003", "No address by this id");
         }
-        else {
-            final CustomerAddressEntity customerAddressEntity = getCustomerAddressByAddressId(addressEntityToBeDeleted);
-            final CustomerEntity belongsToAddressEntity = customerAddressEntity.getCustomer();
-            if(belongsToAddressEntity.getUuid() != customerEntity.getUuid()){
-                throw new AuthorizationFailedException("ATHR-004", "You are not authorized to view/update/delete any one else's address ");
-            }
-            else {
-                return addressEntityToBeDeleted;
+        CustomerAddressEntity customerAddressEntity =
+                customerAddressDao.customerAddressByAddress(addressEntity);
+        if (!customerAddressEntity.getCustomer().getUuid().equals(customerEntity.getUuid())) {
+            throw new AuthorizationFailedException(
+                    "ATHR-004", "You are not authorized to view/update/delete any one else's address");
+        }
+        return addressEntity;
+    }
+
+    /**
+     * This method implements the logic to get All the States from database.
+     *
+     * @return List<StateEntity> object.
+     */
+    public List<StateEntity> getAllStates() {
+        return stateDao.getAllStates();
+    }
+
+    /**
+     * Returns state for a given UUID
+     *
+     * @param stateUuid UUID of the state entity
+     * @return StateEntity object.
+     * @throws AddressNotFoundException If given uuid does not exist in database.
+     */
+    public StateEntity getStateByUUID(final String stateUuid) throws AddressNotFoundException {
+        if (stateDao.getStateByUUID(stateUuid) == null) {
+            throw new AddressNotFoundException("ANF-002", "No state by this id");
+        }
+        return stateDao.getStateByUUID(stateUuid);
+    }
+
+    // method checks provided pincode is in valid format or not
+    private boolean isValidPinCode(final String pincode) {
+        if (pincode.length() != 6) {
+            return false;
+        }
+        for (int i = 0; i < pincode.length(); i++) {
+            if (!Character.isDigit(pincode.charAt(i))) {
+                return false;
             }
         }
-    }
-
-    //Get Customer-Address entity
-    @Transactional(propagation = Propagation.REQUIRED)
-    public CustomerAddressEntity getCustomerAddressByAddressId(final AddressEntity addressEntity){
-        return customerAddressDao.getCustomerAddressByAddressId(addressEntity);
-    }
-
-    @Transactional(propagation = Propagation.REQUIRED)
-    public AddressEntity deleteAddress(AddressEntity addressEntity){
-                return addressDao.deleteAddress(addressEntity);
-            }
-
-    //List all states available DB table
-    @Transactional(propagation = Propagation.REQUIRED)
-    public List<StateEntity> getAllStates(){
-        return stateDao.getAllStates();
+        return true;
     }
 }

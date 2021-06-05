@@ -1,6 +1,5 @@
 package com.upgrad.FoodOrderingApp.service.dao;
 
-import com.upgrad.FoodOrderingApp.service.entity.CustomerAuthEntity;
 import com.upgrad.FoodOrderingApp.service.entity.CustomerEntity;
 import org.springframework.stereotype.Repository;
 
@@ -8,45 +7,48 @@ import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
 
+/** This class provides the database access for all the endpoints in the customer controller. */
 @Repository
 public class CustomerDao {
 
-    @PersistenceContext
-    private EntityManager entityManager;
+    @PersistenceContext private EntityManager entityManager;
 
-    //Persisting the customer information of the created customer
-    public CustomerEntity createCustomer(CustomerEntity customerEntity){
-        this.entityManager.persist(customerEntity);
+    /**
+     * This method saves the details of the new customer in database.
+     *
+     * @param customerEntity for creating new customer.
+     * @return CustomerEntity object.
+     */
+    public CustomerEntity saveCustomer(final CustomerEntity customerEntity) {
+        entityManager.persist(customerEntity);
         return customerEntity;
     }
 
-    //Returns a customer based on the give contact number
-    public CustomerEntity getCustomerByContactNum(String contactNum){
-        try{
-            return (CustomerEntity)this.entityManager.createNamedQuery("customerByContactNum", CustomerEntity.class).setParameter("contactNum", contactNum).getSingleResult();
-        }catch(NoResultException nre){
+    /**
+     * This method helps finds the customer by using contact number.
+     *
+     * @param contactNumber to find the customer is already registered with this number
+     * @return CustomerEntity if the contact number exists in the database
+     */
+    public CustomerEntity getCustomerByContactNumber(final String contactNumber) {
+        try {
+            return entityManager
+                    .createNamedQuery("customerByContactNumber", CustomerEntity.class)
+                    .setParameter("contactNumber", contactNumber)
+                    .getSingleResult();
+        } catch (NoResultException nre) {
             return null;
         }
     }
 
-    //Creates a record in customer_auth table
-    public CustomerAuthEntity createAuthToken(CustomerAuthEntity customerAuthEntity){
-
-        this.entityManager.persist(customerAuthEntity);
-        return customerAuthEntity;
-    }
-
-    //Fetches the CustomerAuthEntity based on the access token
-    public CustomerAuthEntity getCustomerAuthToken(final String accessToken){
-        try{
-            return entityManager.createNamedQuery("cusomerAuthTokenByAccessToken", CustomerAuthEntity.class).setParameter("accessToken", accessToken).getSingleResult();
-        }catch(NoResultException nre){
-            return null;
-        }
-    }
-
-    //Updates the Customer information
-    public void updateCustomer(CustomerEntity updatedCustomerEntity){
-        this.entityManager.merge(updatedCustomerEntity);
+    /**
+     * This method updates the customer details in the database.
+     *
+     * @param customerEntity CustomerEntity object to update.
+     * @return Updated CustomerEntity object.
+     */
+    public CustomerEntity updateCustomer(final CustomerEntity customerEntity) {
+        entityManager.merge(customerEntity);
+        return customerEntity;
     }
 }
