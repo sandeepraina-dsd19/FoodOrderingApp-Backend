@@ -9,101 +9,62 @@ import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
-/*Defining the Customer Entity based on Customer table*/
 @Entity
-@Table(
-        name = "customer"
-)
-
-/*Fetch customer based on their contact number*/
-@NamedQueries(
-        @NamedQuery(name= "customerByContactNum", query= "select c from CustomerEntity c where c.contactNum = :contactNum")
-)
-
+@Table(name = "customer")
+@NamedQueries({
+        @NamedQuery(
+                name = "customerByContactNumber",
+                query = "select c from CustomerEntity c where c.contactNumber=:contactNumber")
+})
 public class CustomerEntity implements Serializable {
 
     @Id
-    @Column(/*The primary key of the customer table*/
-            name = "ID"
-    )
-    @GeneratedValue(
-            strategy = GenerationType.IDENTITY
-    )
-    private long id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
+    private Integer id;
 
-    @Column(/*Must be unique and not null*/
-            name = "UUID"
-    )
     @NotNull
-    @Size(
-            max = 200
-    )
+    @Size(max = 200)
+    @Column(name = "uuid", unique = true)
     private String uuid;
 
-    @Column(/*First name cannot be null*/
-            name = "FIRSTNAME"
-    )
-//    @NotNull
-    @Size(
-            max = 30
-    )
+    @NotNull
+    @Size(max = 30)
+    @Column(name = "firstname")
     private String firstName;
 
-    @Column(/*Last name can be null*/
-            name = "LASTNAME"
-    )
-    @Size(
-            max = 30
-    )
+    @Size(max = 30)
+    @Column(name = "lastname")
     private String lastName;
 
-    @Column(/*Email can be null*/
-            name = "EMAIL"
-    )
-    @Size(
-            max = 50
-    )
-    private String email;
+    @Size(max = 50)
+    @Column(name = "email")
+    private String emailAddress;
 
-    @Column(/*Contact number must be unique and not null*/
-            name = "CONTACT_NUMBER"
-    )
-    @Size(
-            max = 30
-    )
-    private String contactNum;
+    @NotNull
+    @Size(max = 30)
+    @Column(name = "contact_number", unique = true)
+    private String contactNumber;
 
-    @Column(
-            name = "PASSWORD"
-    )
-//    @NotNull
+    @NotNull
+    @Size(max = 255)
+    @Column(name = "password")
     private String password;
 
-    @Column(
-            name = "SALT"
-    )
     @NotNull
-    @Size(
-            max = 200
-    )
+    @Size(max = 255)
+    @Column(name = "salt")
     private String salt;
 
-    public long getId() {
-        return id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
-    }
-
-    public String getUuid() {
-        return uuid;
-    }
-
-    public void setUuid(String uuid) {
-        this.uuid = uuid;
-    }
+    @OneToMany
+    @JoinTable(
+            name = "customer_address",
+            joinColumns = @JoinColumn(name = "customer_id"),
+            inverseJoinColumns = @JoinColumn(name = "address_id"))
+    private List<AddressEntity> addresses = new ArrayList<>();
 
     public String getFirstName() {
         return firstName;
@@ -121,20 +82,20 @@ public class CustomerEntity implements Serializable {
         this.lastName = lastName;
     }
 
-    public String getEmail() {
-        return email;
+    public String getEmailAddress() {
+        return emailAddress;
     }
 
-    public void setEmail(String email) {
-        this.email = email;
+    public void setEmailAddress(String emailAddress) {
+        this.emailAddress = emailAddress;
     }
 
-    public String getContactNum() {
-        return contactNum;
+    public String getContactNumber() {
+        return contactNumber;
     }
 
-    public void setContactNum(String contactNum) {
-        this.contactNum = contactNum;
+    public void setContactNumber(String contactNumber) {
+        this.contactNumber = contactNumber;
     }
 
     public String getPassword() {
@@ -145,6 +106,22 @@ public class CustomerEntity implements Serializable {
         this.password = password;
     }
 
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public String getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
+    }
+
     public String getSalt() {
         return salt;
     }
@@ -153,11 +130,18 @@ public class CustomerEntity implements Serializable {
         this.salt = salt;
     }
 
+    public List<AddressEntity> getAddresses() {
+        return addresses;
+    }
+
+    public void setAddresses(List<AddressEntity> addresses) {
+        this.addresses = addresses;
+    }
+
     @Override
     public boolean equals(Object obj) {
         return new EqualsBuilder().append(this, obj).isEquals();
     }
-
 
     @Override
     public int hashCode() {
@@ -168,5 +152,4 @@ public class CustomerEntity implements Serializable {
     public String toString() {
         return ToStringBuilder.reflectionToString(this, ToStringStyle.MULTI_LINE_STYLE);
     }
-
 }

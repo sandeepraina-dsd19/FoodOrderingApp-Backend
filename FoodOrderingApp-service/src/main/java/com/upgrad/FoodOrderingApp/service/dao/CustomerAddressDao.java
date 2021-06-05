@@ -2,40 +2,44 @@ package com.upgrad.FoodOrderingApp.service.dao;
 
 import com.upgrad.FoodOrderingApp.service.entity.AddressEntity;
 import com.upgrad.FoodOrderingApp.service.entity.CustomerAddressEntity;
-import com.upgrad.FoodOrderingApp.service.entity.CustomerEntity;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
-import java.util.ArrayList;
-import java.util.List;
 
+/**
+ * CustomerAddressDao class provides the database access for all the required endpoints inside the
+ * customer and address controllers.
+ */
 @Repository
 public class CustomerAddressDao {
 
-    @PersistenceContext
-    private EntityManager entityManager;
+    @PersistenceContext private EntityManager entityManager;
 
-    //Retrieves Customer address by Address Id
-    public CustomerAddressEntity getCustomerAddressByAddressId(AddressEntity addressEntity){
-        try{
-            return this.entityManager.createNamedQuery("customerAddressByAddressId", CustomerAddressEntity.class).setParameter("address", addressEntity).getSingleResult();
-        }catch(NoResultException nre){
-            return null;
-        }
+    /**
+     * Creates mapping between the customer and the address entity.
+     *
+     * @param customerAddressEntity Customer and the address to map.
+     * @return CustomerAddressEntity object.
+     */
+    public void createCustomerAddress(final CustomerAddressEntity customerAddressEntity) {
+        entityManager.persist(customerAddressEntity);
     }
 
-    //Retrieve the list of addresses of a particular customer
-    public List<AddressEntity> getCustomerAddressListByCustomer(CustomerEntity customerEntity){
-        try{
-            List<AddressEntity> addressEntityList = new ArrayList<>();
-            List<CustomerAddressEntity> customerAddressEntityList = this.entityManager.createNamedQuery("customerAddressesByCustomerId", CustomerAddressEntity.class).setParameter("customer", customerEntity).getResultList();
-            for(CustomerAddressEntity customerAddressEntity:customerAddressEntityList){
-                addressEntityList.add(customerAddressEntity.getAddress());
-            }
-            return addressEntityList;
-        }catch (NoResultException nre){
+    /**
+     * fetches the address of a customer using givne address.
+     *
+     * @param address address to fetch.
+     * @return CustomerAddressEntity type object.
+     */
+    public CustomerAddressEntity customerAddressByAddress(final AddressEntity address) {
+        try {
+            return entityManager
+                    .createNamedQuery("customerAddressByAddress", CustomerAddressEntity.class)
+                    .setParameter("address", address)
+                    .getSingleResult();
+        } catch (NoResultException nre) {
             return null;
         }
     }

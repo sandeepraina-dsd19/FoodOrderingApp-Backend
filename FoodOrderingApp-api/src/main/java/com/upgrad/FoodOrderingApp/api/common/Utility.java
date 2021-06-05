@@ -12,7 +12,7 @@ public class Utility {
    * @throws AuthorizationFailedException
    */
   public static String getTokenFromAuthorization(String authorization)
-      throws AuthorizationFailedException {
+          throws AuthorizationFailedException {
     String[] authParts = authorization.split("Bearer ");
     if (authParts.length != 2) {
       throw new AuthorizationFailedException("ATHR-001", "Customer is not Logged in.");
