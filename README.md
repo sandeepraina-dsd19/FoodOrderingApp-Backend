@@ -12,7 +12,7 @@
     spring.datasource.customername=<username>
     spring.datasource.password=<password> ``
   
- > * For **localhost.properties** file:
+ > * For **localhost.properties** file: <br>
     ``server.port=<port>
     server.host=localhost
     database.name=restaurantdb
