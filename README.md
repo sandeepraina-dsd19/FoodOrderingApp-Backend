@@ -32,7 +32,7 @@
    ![Build](unittestcase.jpeg)
 
 * Run the application and use Swagger UI to check the end-point with following link  <br>
-  ``localhost:8080/api/swagger-ui.html``
+  ``localhost:8080/api/swagger-ui.html`` <br>
   ***It should load below page*** <hr>
  
    ![Build](swaggerpage.jpeg)
