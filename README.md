@@ -23,17 +23,17 @@
 * Complile the project with following command ``mvn clean install -Psetup`` <br>
 *If above config is correct you should see below success build and success for unit testcase.*
  
-  ### Successful Build
+  ### Successful Build <hr>
  
-  ![Build](build.jpeg)
+   ![Build](build.jpeg)
  
- ### Successful unit testcase
+  ### Successful unit testcase <hr>
  
-  ![Build](unittestcase.jpeg)
+   ![Build](unittestcase.jpeg)
 
-* Run the application and use Swagger UI to check the end-point with following link
+* Run the application and use Swagger UI to check the end-point with following link  <br>
   ``localhost:8080/api/swagger-ui.html``
-  It should load below page.
+  ***It should load below page*** <hr>
  
-  ![Build](swaggerpage.jpeg)
+   ![Build](swaggerpage.jpeg)
   
